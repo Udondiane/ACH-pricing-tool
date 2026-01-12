@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bridge to Employment | Partnership Pricing | ACH</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.6; }
+    
+    .header {
+      background: linear-gradient(135deg, #0f1c3f 0%, #1a2d5a 100%);
+      color: white;
+      padding: 40px 32px;
+    }
+    .header-content { max-width: 1100px; margin: 0 auto; }
+    .logo-row { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .logo-icon { width: 48px; height: 48px; }
+    .logo-text { font-size: 1.8rem; font-weight: 700; letter-spacing: 0.05em; }
+    .header h1 { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 600; margin-bottom: 8px; }
+    .header p { font-size: 1.05rem; opacity: 0.85; max-width: 700px; margin-bottom: 12px; }
+    .header-stats { font-size: 0.9rem; opacity: 0.7; }
+    .header-stats span { margin-right: 16px; }
+    
+    .main-content { max-width: 1100px; margin: 0 auto; padding: 40px 32px; }
+    .two-col { display: grid; grid-template-columns: 1fr 400px; gap: 32px; align-items: start; }
+    @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+    
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      margin-bottom: 24px;
+    }
+    .card-title { font-family: 'Fraunces', serif; font-size: 1.2rem; color: #0f1c3f; margin-bottom: 20px; }
+    
+    .standard-package {
+      background: #f0fdf4;
+      border: 2px solid #86efac;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .package-title { font-size: 1rem; color: #0f1c3f; margin-bottom: 8px; }
+    .package-desc { font-size: 0.9rem; color: #64748b; margin-bottom: 12px; }
+    .package-list { font-size: 0.9rem; color: #475569; padding-left: 20px; margin: 0; }
+    .package-list li { margin-bottom: 6px; }
+    
+    .plus-intro { font-size: 0.9rem; color: #64748b; margin-bottom: 12px; font-style: italic; }
+    
+    .milestone-info {
+      margin-top: 16px;
+      padding: 16px;
+      background: #f0f9ff;
+      border-radius: 8px;
+      font-size: 0.85rem;
+    }
+    .milestone-info p { margin: 0 0 8px 0; color: #0f1c3f; }
+    .milestone-info ul { margin: 0; padding-left: 20px; color: #475569; }
+    .milestone-info li { margin-bottom: 4px; }
+    
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; font-weight: 600; color: #1e293b; margin-bottom: 8px; font-size: 0.95rem; }
+    .form-input, .form-select {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+    }
+    .form-input:focus, .form-select:focus { outline: none; border-color: #0f1c3f; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    
+    /* Roles Section */
+    .roles-section {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .roles-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .roles-header h4 { font-size: 1rem; color: #0f1c3f; }
+    
+    .role-row-header {
+      display: grid;
+      grid-template-columns: 1fr 100px 100px 40px;
+      gap: 12px;
+      padding: 0 12px 8px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #64748b;
+    }
+    
+    .add-role-btn {
+      background: #0f1c3f;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .add-role-btn:hover { background: #1a2d5a; }
+    
+    .role-row {
+      display: grid;
+      grid-template-columns: 1fr 100px 100px 40px;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      background: white;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border: 1px solid #e2e8f0;
+    }
+    .role-row select, .role-row input {
+      padding: 10px 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+    }
+    .role-row input { text-align: center; }
+    .role-row input.salary-input { text-align: left; }
+    
+    .remove-btn {
+      background: #fee2e2;
+      color: #dc2626;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+    .remove-btn:hover { background: #fecaca; }
+    .remove-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    
+    /* Option Boxes */
+    .option-box {
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .option-box:hover { border-color: #94a3b8; }
+    .option-box.selected { border-color: #22c55e; background: #f0fdf4; }
+    .option-box.selected.blue { border-color: #3b82f6; background: #eff6ff; }
+    
+    .option-header { display: flex; align-items: flex-start; gap: 12px; }
+    .option-checkbox {
+      width: 22px;
+      height: 22px;
+      margin-top: 2px;
+      cursor: pointer;
+      accent-color: #0f1c3f;
+    }
+    .option-content h4 { font-size: 1rem; color: #0f1c3f; margin-bottom: 4px; }
+    .option-content p { font-size: 0.9rem; color: #64748b; margin: 0; }
+    
+    .option-details {
+      display: none;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #e2e8f0;
+    }
+    .option-details.show { display: block; }
+    .option-details ul { padding-left: 20px; margin: 0; }
+    .option-details li { font-size: 0.9rem; color: #475569; margin-bottom: 6px; }
+    
+    .data-note { 
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: #fef9e7;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: #92400e;
+    }
+    .data-note p { margin: 0; }
+    
+    /* Data Agreement */
+    .data-agreement {
+      display: none;
+      background: #fffbeb;
+      border: 2px solid #fcd34d;
+      border-radius: 12px;
+      padding: 24px;
+      margin-top: 16px;
+    }
+    .data-agreement.show { display: block; }
+    .data-agreement h4 { color: #92400e; font-size: 1rem; margin-bottom: 16px; }
+    .data-section { margin-bottom: 16px; }
+    .data-section h5 { font-size: 0.9rem; color: #0f1c3f; margin-bottom: 8px; }
+    .data-section ul { font-size: 0.85rem; color: #64748b; padding-left: 20px; }
+    .data-section li { margin-bottom: 4px; }
+    
+    .warning-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin: 16px 0;
+    }
+    .warning-box p { font-size: 0.85rem; color: #991b1b; font-weight: 500; margin: 0; }
+    
+    .agree-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding-top: 16px;
+      border-top: 1px solid #fcd34d;
+    }
+    .agree-row input { width: 20px; height: 20px; margin-top: 2px; cursor: pointer; }
+    .agree-row label { font-size: 0.9rem; color: #1e293b; cursor: pointer; }
+    
+    /* Quote Panel */
+    .quote-panel { 
+      position: sticky; 
+      top: 24px;
+      align-self: start;
+    }
+    .quote-card {
+      background: linear-gradient(135deg, #0f1c3f, #1a2d5a);
+      color: white;
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+    .quote-card h3 { font-family: 'Fraunces', serif; font-size: 1.1rem; margin-bottom: 20px; opacity: 0.9; }
+    
+    .quote-total {
+      text-align: center;
+      padding: 20px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      margin-bottom: 20px;
+    }
+    .quote-total-label { font-size: 0.85rem; opacity: 0.7; margin-bottom: 8px; }
+    .quote-total-value { font-family: 'Fraunces', serif; font-size: 2.5rem; font-weight: 700; }
+    .quote-total-note { font-size: 0.8rem; opacity: 0.6; margin-top: 8px; }
+    
+    .quote-line {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .quote-line:last-child { border-bottom: none; }
+    .quote-line span:first-child { opacity: 0.85; }
+    .quote-line span:last-child { font-weight: 600; }
+    
+    .payment-schedule {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.2);
+    }
+    .payment-schedule h4 { font-size: 0.85rem; opacity: 0.7; margin-bottom: 12px; }
+    .payment-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 0.85rem; opacity: 0.85; }
+    
+    .payment-schedule {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.2);
+    }
+    .payment-schedule h4 { font-size: 0.85rem; opacity: 0.7; margin-bottom: 12px; }
+    .payment-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 0.85rem; opacity: 0.85; }
+    
+    .guarantee-badge {
+      background: #22c55e;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-top: 16px;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+    
+    .included-note {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.2);
+      font-size: 0.8rem;
+      opacity: 0.6;
+      line-height: 1.5;
+    }
+    
+    .empty-quote {
+      text-align: center;
+      padding: 40px 20px;
+      opacity: 0.5;
+    }
+    
+    .info-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+    .info-card h4 { font-family: 'Fraunces', serif; font-size: 1rem; color: #0f1c3f; margin-bottom: 12px; }
+    .info-card ul { font-size: 0.9rem; color: #64748b; padding-left: 20px; }
+    .info-card li { margin-bottom: 8px; }
+    .info-card strong { color: #0f1c3f; }
+    
+    .submit-btn {
+      width: 100%;
+      background: #059669;
+      color: white;
+      border: none;
+      padding: 16px 24px;
+      border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .submit-btn:hover { background: #047857; }
+    .submit-btn:disabled { background: #94a3b8; cursor: not-allowed; }
+    
+    /* Success */
+    .success-message {
+      display: none;
+      background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+      border: 2px solid #34d399;
+      border-radius: 16px;
+      padding: 48px;
+      text-align: center;
+      margin: 40px auto;
+      max-width: 600px;
+    }
+    .success-message.show { display: block; }
+    .success-message h2 { font-family: 'Fraunces', serif; color: #059669; font-size: 1.8rem; margin-bottom: 16px; }
+    .success-message p { color: #065f46; font-size: 1.05rem; margin-bottom: 8px; }
+    .ref-number {
+      font-family: monospace;
+      background: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      display: inline-block;
+      margin-top: 16px;
+      font-size: 1.1rem;
+      color: #0f1c3f;
+    }
+    
+    .form-container.hide { display: none; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-content">
+      <div class="logo-row">
+        <svg viewBox="0 0 60 60" class="logo-icon">
+          <circle cx="30" cy="12" r="5" fill="#7eb8c9"/>
+          <rect x="27" y="17" width="6" height="15" rx="3" fill="#7eb8c9"/>
+          <circle cx="48" cy="24" r="5" fill="#e8927c"/>
+          <rect x="45" y="29" width="6" height="15" rx="3" fill="#e8927c" transform="rotate(72 48 36)"/>
+          <circle cx="42" cy="46" r="5" fill="#c4d454"/>
+          <rect x="39" y="31" width="6" height="15" rx="3" fill="#c4d454" transform="rotate(144 42 38)"/>
+          <circle cx="18" cy="46" r="5" fill="#e89850"/>
+          <rect x="15" y="31" width="6" height="15" rx="3" fill="#e89850" transform="rotate(-144 18 38)"/>
+          <circle cx="12" cy="24" r="5" fill="#a8d5e5"/>
+          <rect x="9" y="29" width="6" height="15" rx="3" fill="#a8d5e5" transform="rotate(-72 12 36)"/>
+        </svg>
+        <span class="logo-text">ACH</span>
+      </div>
+      <h1>Bridge to Employment Partnership</h1>
+      <p>Helping employers build inclusive teams. Helping people new to the UK find work.</p>
+    </div>
+  </header>
+  
+  <div class="main-content">
+    <!-- Success Message -->
+    <div class="success-message" id="successMessage">
+      <h2>✓ Inquiry Submitted Successfully</h2>
+      <p>Thank you for your interest in partnering with ACH.</p>
+      <p>Our team will contact you within 2 business days.</p>
+      <div class="ref-number" id="refNumber">REF: ACH-0000</div>
+    </div>
+    
+    <!-- Form -->
+    <div class="form-container" id="formContainer">
+      <div class="two-col">
+        <div>
+          <!-- Organisation -->
+          <div class="card">
+            <h3 class="card-title">Your Organisation</h3>
+            
+            <div class="form-group">
+              <label class="form-label">Organisation Name *</label>
+              <input type="text" class="form-input" id="companyName">
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Sector *</label>
+              <select class="form-select" id="sector">
+                <option value="">Select sector...</option>
+                <option value="Healthcare">Healthcare</option>
+                <option value="Social Care">Social Care</option>
+                <option value="Hospitality">Hospitality</option>
+                <option value="Retail">Retail</option>
+                <option value="Manufacturing">Manufacturing</option>
+                <option value="Logistics">Logistics & Warehousing</option>
+                <option value="Public Sector">Public Sector</option>
+                <option value="Education">Education</option>
+                <option value="Facilities">Facilities & Cleaning</option>
+                <option value="Food Service">Food Service</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Contact Name *</label>
+                <input type="text" class="form-input" id="contactName">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Contact Email *</label>
+                <input type="email" class="form-input" id="contactEmail">
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Phone Number</label>
+              <input type="tel" class="form-input" id="contactPhone">
+            </div>
+          </div>
+          
+          <!-- Roles -->
+          <div class="card">
+            <h3 class="card-title">Workforce Solutions</h3>
+            
+            <!-- Workforce Solutions Standard -->
+            <div class="standard-package">
+              <h4 class="package-title">Workforce Solutions Standard</h4>
+              <p class="package-desc">Your partnership includes:</p>
+              <ul class="package-list">
+                <li>Candidate introductions — motivated candidates with international experience</li>
+                <li>Pre-screening — right to work, skills, English proficiency</li>
+                <li>Candidate matching — based on your requirements and candidate strengths</li>
+                <li>12-week workplace integration support</li>
+                <li>Inclusive recruitment best practices toolkit</li>
+                <li>Standard guarantee — if someone leaves within 12 weeks, we'll introduce another candidate at no extra cost</li>
+              </ul>
+            </div>
+            
+            <div class="roles-section">
+              <div class="roles-header">
+                <h4>Roles You're Hiring For</h4>
+                <button class="add-role-btn" id="addRoleBtn">+ Add Role</button>
+              </div>
+              <div id="rolesContainer"></div>
+            </div>
+            
+            <!-- Workforce Solutions Plus Option -->
+            <div class="option-box" id="integrationPlusBox">
+              <div class="option-header">
+                <input type="checkbox" class="option-checkbox" id="integrationPlusCheck">
+                <div class="option-content">
+                  <h4>Workforce Solutions Plus</h4>
+                  <p>Comprehensive support for long-term success</p>
+                </div>
+              </div>
+              <div class="option-details" id="integrationPlusDetails">
+                <p class="plus-intro">Everything in Standard, plus:</p>
+                <ul>
+                  <li>12-month candidate retention guarantee with milestone payments</li>
+                  <li>Inclusive recruitment and cultural awareness training — delivered by one of our lived experience facilitators</li>
+                  <li>Access to our academically-validated Impact Platform — with free quarterly impact reports</li>
+                </ul>
+                <div class="milestone-info">
+                  <p><strong>Payment structure:</strong></p>
+                  <ul>
+                    <li>Standard fee + 60% of Plus on placement</li>
+                    <li>20% of Plus at 6 months retention</li>
+                    <li>20% of Plus at 12 months retention</li>
+                  </ul>
+                </div>
+                <div class="agree-row">
+                  <input type="checkbox" id="dataAgreeCheck">
+                  <label for="dataAgreeCheck">I understand that candidate data is required at specified intervals for impact reporting</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Quote Panel -->
+        <div class="quote-panel">
+          <div class="quote-card">
+            <h3>Your Partnership Investment</h3>
+            <div id="quoteContent">
+              <div class="empty-quote">
+                <p>Add roles to see your investment</p>
+              </div>
+            </div>
+          </div>
+          
+          <button class="submit-btn" id="submitBtn" disabled>Submit Inquiry</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // ============ CONFIGURATION ============
+    var SUPABASE_URL = 'https://gmjqidqjpzxcpgycawxf.supabase.co';
+    var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtanFpZHFqcHp4Y3BneWNhd3hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MjYyMDEsImV4cCI6MjA4MzMwMjIwMX0.6jtYlz6yoBQCrh04P0g30JigHyanGYnv7xBz24B5Bm4';
+    
+    var ROLES = [
+      { id: 'healthcare_assistant', name: 'Healthcare Assistant' },
+      { id: 'care_worker', name: 'Care Worker' },
+      { id: 'support_worker', name: 'Support Worker' },
+      { id: 'admin_officer', name: 'Administrative Officer' },
+      { id: 'admin_assistant', name: 'Administrative Assistant' },
+      { id: 'receptionist', name: 'Receptionist' },
+      { id: 'customer_service', name: 'Customer Service Advisor' },
+      { id: 'cleaner', name: 'Cleaner / Domestic Assistant' },
+      { id: 'kitchen_porter', name: 'Kitchen Porter' },
+      { id: 'catering_assistant', name: 'Catering Assistant' },
+      { id: 'housekeeping', name: 'Housekeeping Attendant' },
+      { id: 'warehouse', name: 'Warehouse Operative' },
+      { id: 'production', name: 'Production Operative' },
+      { id: 'recycling', name: 'Recycling / Waste Operative' },
+      { id: 'driver', name: 'Driver (Cat B)' },
+      { id: 'driver_hgv', name: 'Driver (HGV)' },
+      { id: 'security', name: 'Security Officer' },
+      { id: 'maintenance', name: 'Maintenance / Facilities' },
+      { id: 'it_support', name: 'IT Support' },
+      { id: 'accounts_assistant', name: 'Accounts Assistant' },
+      { id: 'teaching_assistant', name: 'Teaching Assistant' },
+      { id: 'retail', name: 'Retail Team Member' },
+      { id: 'other', name: 'Other' }
+    ];
+    
+    // Hidden pricing constants
+    var BASE_RATE = 0.18;
+    var INTEGRATION_PLUS_PREMIUM = 0.50;
+    
+    // ============ STATE ============
+    var rolesList = [{ id: 1, roleType: '', salary: '', quantity: 1 }];
+    var roleIdCounter = 1;
+    var supabaseClient = null;
+    var quoteUpdateTimer = null;
+    
+    // Debounced quote update - waits 800ms after last change
+    function debouncedUpdateQuote() {
+      if (quoteUpdateTimer) {
+        clearTimeout(quoteUpdateTimer);
+      }
+      quoteUpdateTimer = setTimeout(function() {
+        updateQuote();
+      }, 800);
+    }
+    
+    // ============ INITIALIZATION ============
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Page loaded, initializing...');
+      
+      // Initialize Supabase
+      if (window.supabase) {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        console.log('Supabase initialized');
+      } else {
+        console.error('Supabase not loaded');
+      }
+      
+      // Render initial roles
+      renderRoles();
+      
+      // Add event listeners
+      document.getElementById('addRoleBtn').addEventListener('click', addRole);
+      document.getElementById('integrationPlusCheck').addEventListener('change', handleIntegrationPlusChange);
+      document.getElementById('dataAgreeCheck').addEventListener('change', function() {
+        debouncedUpdateQuote();
+        validateForm();
+      });
+      document.getElementById('submitBtn').addEventListener('click', submitInquiry);
+      
+      // Form field listeners
+      var formFields = ['companyName', 'sector', 'contactName', 'contactEmail'];
+      formFields.forEach(function(fieldId) {
+        document.getElementById(fieldId).addEventListener('input', function() {
+          updateQuote();
+          validateForm();
+        });
+      });
+      
+      console.log('Initialization complete');
+    });
+    
+    // ============ ROLES ============
+    function renderRoles() {
+      console.log('Rendering roles:', rolesList);
+      var container = document.getElementById('rolesContainer');
+      var html = '';
+      
+      // Header row
+      html += '<div class="role-row-header">';
+      html += '<span>Role</span>';
+      html += '<span>Salary (£)</span>';
+      html += '<span>Qty</span>';
+      html += '<span></span>';
+      html += '</div>';
+      
+      for (var i = 0; i < rolesList.length; i++) {
+        var role = rolesList[i];
+        html += '<div class="role-row" data-role-id="' + role.id + '">';
+        html += '<select class="role-select">';
+        html += '<option value="">Select role...</option>';
+        
+        for (var j = 0; j < ROLES.length; j++) {
+          var r = ROLES[j];
+          var selected = (role.roleType === r.id) ? ' selected' : '';
+          html += '<option value="' + r.id + '"' + selected + '>' + r.name + '</option>';
+        }
+        
+        html += '</select>';
+        html += '<input type="number" class="salary-input" min="15000" step="500" placeholder="e.g. 24000" value="' + (role.salary || '') + '">';
+        html += '<input type="number" class="role-qty" min="1" value="' + role.quantity + '">';
+        html += '<button class="remove-btn"' + (rolesList.length === 1 ? ' disabled' : '') + '>×</button>';
+        html += '</div>';
+      }
+      
+      container.innerHTML = html;
+      
+      // Add event listeners to new elements
+      var rows = container.querySelectorAll('.role-row');
+      rows.forEach(function(row) {
+        var roleId = parseInt(row.getAttribute('data-role-id'));
+        
+        row.querySelector('.role-select').addEventListener('change', function(e) {
+          updateRoleType(roleId, e.target.value);
+        });
+        
+        row.querySelector('.salary-input').addEventListener('input', function(e) {
+          updateRoleSalary(roleId, e.target.value);
+        });
+        
+        row.querySelector('.role-qty').addEventListener('input', function(e) {
+          updateRoleQuantity(roleId, e.target.value);
+        });
+        
+        row.querySelector('.remove-btn').addEventListener('click', function() {
+          removeRole(roleId);
+        });
+      });
+    }
+    
+    function addRole() {
+      console.log('Adding role');
+      roleIdCounter++;
+      rolesList.push({ id: roleIdCounter, roleType: '', salary: '', quantity: 1 });
+      renderRoles();
+      debouncedUpdateQuote();
+    }
+    
+    function removeRole(id) {
+      console.log('Removing role:', id);
+      if (rolesList.length <= 1) return;
+      
+      rolesList = rolesList.filter(function(r) { return r.id !== id; });
+      renderRoles();
+      debouncedUpdateQuote();
+      validateForm();
+    }
+    
+    function updateRoleType(id, value) {
+      console.log('Updating role type:', id, value);
+      for (var i = 0; i < rolesList.length; i++) {
+        if (rolesList[i].id === id) {
+          rolesList[i].roleType = value;
+          break;
+        }
+      }
+      debouncedUpdateQuote();
+      validateForm();
+    }
+    
+    function updateRoleSalary(id, value) {
+      console.log('Updating role salary:', id, value);
+      for (var i = 0; i < rolesList.length; i++) {
+        if (rolesList[i].id === id) {
+          rolesList[i].salary = parseInt(value) || 0;
+          break;
+        }
+      }
+      debouncedUpdateQuote();
+      validateForm();
+    }
+    
+    function updateRoleQuantity(id, value) {
+      console.log('Updating role quantity:', id, value);
+      for (var i = 0; i < rolesList.length; i++) {
+        if (rolesList[i].id === id) {
+          rolesList[i].quantity = parseInt(value) || 1;
+          break;
+        }
+      }
+      debouncedUpdateQuote();
+      validateForm();
+    }
+    
+    // ============ OPTIONS ============
+    function handleIntegrationPlusChange() {
+      var checked = document.getElementById('integrationPlusCheck').checked;
+      var box = document.getElementById('integrationPlusBox');
+      var details = document.getElementById('integrationPlusDetails');
+      
+      console.log('Integration Plus changed:', checked);
+      
+      if (checked) {
+        box.classList.add('selected');
+        details.classList.add('show');
+      } else {
+        box.classList.remove('selected');
+        details.classList.remove('show');
+        document.getElementById('dataAgreeCheck').checked = false;
+      }
+      
+      debouncedUpdateQuote();
+      validateForm();
+    }
+    
+    // ============ PRICING ============
+    function updateQuote() {
+      console.log('Updating quote');
+      
+      var includeIntegrationPlus = document.getElementById('integrationPlusCheck').checked;
+      var dataAgreed = document.getElementById('dataAgreeCheck').checked;
+      
+      var totalPlacements = 0;
+      var baseFees = 0;
+      var roleBreakdown = [];
+      
+      for (var i = 0; i < rolesList.length; i++) {
+        var role = rolesList[i];
+        if (!role.roleType || !role.salary) continue;
+        
+        var roleConfig = null;
+        for (var j = 0; j < ROLES.length; j++) {
+          if (ROLES[j].id === role.roleType) {
+            roleConfig = ROLES[j];
+            break;
+          }
+        }
+        if (!roleConfig) continue;
+        
+        var quantity = role.quantity || 0;
+        var salary = role.salary || 0;
+        if (quantity <= 0 || salary <= 0) continue;
+        
+        var fee = Math.round(salary * BASE_RATE * quantity);
+        totalPlacements += quantity;
+        baseFees += fee;
+        
+        roleBreakdown.push({
+          name: roleConfig.name,
+          quantity: quantity,
+          salary: salary,
+          fee: fee
+        });
+      }
+      
+      var integrationPlusFee = (includeIntegrationPlus && dataAgreed) ? Math.round(baseFees * INTEGRATION_PLUS_PREMIUM) : 0;
+      var grandTotal = baseFees + integrationPlusFee;
+      
+      // Render quote
+      var container = document.getElementById('quoteContent');
+      
+      if (totalPlacements === 0) {
+        container.innerHTML = '<div class="empty-quote"><p>Add roles to see your investment</p></div>';
+        return;
+      }
+      
+      var html = '<div class="quote-total">';
+      html += '<div class="quote-total-label">Total Investment</div>';
+      html += '<div class="quote-total-value">£' + grandTotal.toLocaleString() + '</div>';
+      html += '<div class="quote-total-note">' + totalPlacements + ' role' + (totalPlacements !== 1 ? 's' : '') + ' supported</div>';
+      html += '</div>';
+      
+      for (var k = 0; k < roleBreakdown.length; k++) {
+        var rb = roleBreakdown[k];
+        html += '<div class="quote-line">';
+        html += '<span>' + rb.name + ' (' + rb.quantity + ')</span>';
+        html += '<span>£' + rb.fee.toLocaleString() + '</span>';
+        html += '</div>';
+      }
+      
+      if (includeIntegrationPlus && dataAgreed && integrationPlusFee > 0) {
+        html += '<div class="quote-line">';
+        html += '<span>Workforce Solutions Plus</span>';
+        html += '<span>£' + integrationPlusFee.toLocaleString() + '</span>';
+        html += '</div>';
+        
+        var plusOnPlacement = Math.round(integrationPlusFee * 0.60);
+        var plusAtSix = Math.round(integrationPlusFee * 0.20);
+        var plusAtTwelve = Math.round(integrationPlusFee * 0.20);
+        var totalOnPlacement = baseFees + plusOnPlacement;
+        
+        html += '<div class="payment-schedule">';
+        html += '<h4>Payment Schedule</h4>';
+        html += '<div class="payment-row"><span>On placement</span><span>£' + totalOnPlacement.toLocaleString() + '</span></div>';
+        html += '<div class="payment-row"><span>At 6 months retention</span><span>£' + plusAtSix.toLocaleString() + '</span></div>';
+        html += '<div class="payment-row"><span>At 12 months retention</span><span>£' + plusAtTwelve.toLocaleString() + '</span></div>';
+        html += '</div>';
+      }
+      
+      container.innerHTML = html;
+      console.log('Quote updated. Total:', grandTotal);
+    }
+    
+    // ============ VALIDATION ============
+    function validateForm() {
+      var companyName = document.getElementById('companyName').value.trim();
+      var sector = document.getElementById('sector').value;
+      var contactName = document.getElementById('contactName').value.trim();
+      var contactEmail = document.getElementById('contactEmail').value.trim();
+      var includeIntegrationPlus = document.getElementById('integrationPlusCheck').checked;
+      var dataAgreed = document.getElementById('dataAgreeCheck').checked;
+      
+      var hasValidRoles = false;
+      for (var i = 0; i < rolesList.length; i++) {
+        if (rolesList[i].roleType && rolesList[i].salary > 0 && rolesList[i].quantity > 0) {
+          hasValidRoles = true;
+          break;
+        }
+      }
+      
+      var isValid = companyName && sector && contactName && contactEmail && hasValidRoles;
+      
+      if (includeIntegrationPlus && !dataAgreed) {
+        isValid = false;
+      }
+      
+      document.getElementById('submitBtn').disabled = !isValid;
+      console.log('Form valid:', isValid);
+    }
+    
+    // ============ SUBMISSION ============
+    async function submitInquiry() {
+      console.log('Submitting inquiry');
+      
+      var btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
+      
+      try {
+        var includeIntegrationPlus = document.getElementById('integrationPlusCheck').checked;
+        var dataAgreed = document.getElementById('dataAgreeCheck').checked;
+        
+        var totalPlacements = 0;
+        var baseFees = 0;
+        var roleBreakdown = [];
+        
+        for (var i = 0; i < rolesList.length; i++) {
+          var role = rolesList[i];
+          if (!role.roleType || !role.salary) continue;
+          
+          var roleConfig = null;
+          for (var j = 0; j < ROLES.length; j++) {
+            if (ROLES[j].id === role.roleType) {
+              roleConfig = ROLES[j];
+              break;
+            }
+          }
+          if (!roleConfig) continue;
+          
+          var quantity = role.quantity || 0;
+          var salary = role.salary || 0;
+          if (quantity <= 0 || salary <= 0) continue;
+          
+          var fee = Math.round(salary * BASE_RATE * quantity);
+          totalPlacements += quantity;
+          baseFees += fee;
+          
+          roleBreakdown.push({
+            name: roleConfig.name,
+            quantity: quantity,
+            salary: salary,
+            fee: fee
+          });
+        }
+        
+        var integrationPlusFee = (includeIntegrationPlus && dataAgreed) ? Math.round(baseFees * INTEGRATION_PLUS_PREMIUM) : 0;
+        var grandTotal = baseFees + integrationPlusFee;
+        
+        var data = {
+          organisation_name: document.getElementById('companyName').value.trim(),
+          sector: document.getElementById('sector').value,
+          employee_count: null,
+          size_tier: null,
+          contact_name: document.getElementById('contactName').value.trim(),
+          contact_email: document.getElementById('contactEmail').value.trim(),
+          contact_phone: document.getElementById('contactPhone').value.trim() || null,
+          roles_requested: roleBreakdown,
+          total_placements: totalPlacements,
+          total_investment: grandTotal,
+          include_integration_plus: includeIntegrationPlus && dataAgreed,
+          integration_plus_fee: integrationPlusFee,
+          data_agreement_accepted: dataAgreed,
+          status: 'New',
+          notes: (includeIntegrationPlus && dataAgreed) ? 'Workforce Solutions Plus: £' + integrationPlusFee : null
+        };
+        
+        console.log('Submitting data:', data);
+        
+        var result = await supabaseClient.from('pricing_inquiries').insert([data]).select();
+        
+        if (result.error) {
+          throw result.error;
+        }
+        
+        console.log('Submission successful:', result.data);
+        
+        document.getElementById('formContainer').classList.add('hide');
+        document.getElementById('successMessage').classList.add('show');
+        document.getElementById('refNumber').textContent = 'REF: ACH-' + String(result.data[0].id).padStart(4, '0');
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+      } catch (error) {
+        console.error('Submission error:', error);
+        alert('Error submitting inquiry. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Submit Inquiry';
+      }
+    }
+  </script>
+</body>
+</html>
